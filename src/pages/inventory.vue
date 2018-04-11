@@ -1,8 +1,9 @@
 <template>
   <div>
     <q-tabs>
-      <q-route-tab slot="title" label="Finished Goods" icon="thumb up" to="/products" />
-      <q-route-tab slot="title" label="Raw Materials" icon="shopping basket" to="/products/raw" />
+      <q-route-tab slot="title" label="Items" icon="local drink" to="/inventory/items" />
+      <q-route-tab slot="title" label="Finished Goods" icon="thumb up" to="/inventory/finished-goods" />
+      <q-route-tab slot="title" label="Raw Materials" icon="shopping basket" to="/inventory/raw-materials" />
     </q-tabs>
     <router-view />
     

@@ -33,7 +33,7 @@
         inset-delimiter
       >
         <q-list-header>Modules</q-list-header>
-        <q-item to="/products">
+        <q-item to="/inventory">
           <q-item-side icon="description" />
           <q-item-main label="Production and Inventory"/>
         </q-item>

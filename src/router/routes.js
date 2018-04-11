@@ -9,29 +9,50 @@ export default [
   },
 
   {
-    path: '/products',
+    path: '/inventory',
     component: () => import('layouts/default'),
     children: [
       {
         path: '',
-        component: () => import('pages/products'),
+        component: () => import('pages/inventory/'),
         children: [
           {
             path: '',
-            component: () => import('pages/products/finished-goods')
+            component: () => import('pages/inventory/inventory')
           }
         ]
       },
       { 
-        path: 'raw', 
-        component: () => import('pages/products'),
+        path: 'raw-materials', 
+        component: () => import('pages/inventory'),
         children: [
           {
             path: '',
-            component: () => import('pages/products/raw-materials')
+            component: () => import('pages/inventory/raw-materials')
           }
         ] 
       },
+      {
+        path: 'items',
+        component: () => import('pages/inventory'),
+        children: [
+          {
+            path: '',
+            component: () => import('pages/inventory/items')
+          }
+        ]
+      },
+      {
+        path: 'finished-goods',
+        component: () => import('pages/inventory'),
+        children: [
+          {
+            path: 'finished-goods',
+            component: () => import('pages/inventory/finished-goods')
+          }
+        ]
+      },
+      
       
     ]
   },
