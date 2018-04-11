@@ -38,16 +38,18 @@
 </style>
 
 <script>
-import { QTable, QTh,QTr, QTd, QTableColumns } from 'quasar'
+import { QTable, QTh,QTr, QTd, QTableColumns, QTooltip, QChip } from 'quasar'
 export default {
   components: {
     QTable,
     QTh,
     QTr,
     QTd,
-    QTableColumns
+    QTableColumns,
+    QTooltip,
+    QChip
   },
-  name: 'Finished Products',
+  name: 'FinishedProducts',
   data: () => ({
     columns: [
       {

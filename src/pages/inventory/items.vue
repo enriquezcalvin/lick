@@ -43,6 +43,16 @@
           <div class="col-12">
             <div>
               <q-field
+              >
+                <q-select
+                  v-model="item.type"
+                  :options="typeOptions"
+                  float-label="Product Type"
+                />
+              </q-field>
+            </div>
+            <div class="q-mt-md">
+              <q-field
                 icon="fas fa-barcode"
               >
                 <q-input v-model="item.SKU" float-label="Product SKU" />
@@ -53,6 +63,11 @@
               >
                 <q-input v-model="item.description" float-label="Product Description" />
               </q-field>
+            </div>
+            <div class="q-mt-lg" v-if="item.recipe">
+              <q-field
+                label="Recipe"
+              />
             </div>
           </div>
         </div>
@@ -67,7 +82,7 @@
 </style>
 
 <script>
-import { QTable, QTh,QTr, QTd, QTableColumns, QModal, QModalLayout, QSearch, QDatetime } from 'quasar'
+import { QTable, QTh,QTr, QTd, QTableColumns, QModal, QModalLayout, QSearch, QDatetime, QSelect } from 'quasar'
 export default {
   components: {
     QTable,
@@ -78,35 +93,48 @@ export default {
     QModal,
     QModalLayout,
     QSearch,
-    QDatetime
+    QDatetime,
+    QSelect
   },
-  name: 'Finished-Products',
+  name: 'Item',
   data: () => ({
     item: {
       SKU: '',
       description: '',
+      type: '',
+      recipe: false,
+      cost: 10
     },
+    typeOptions: [
+      {
+        label: 'Own',
+        value: 'Own'
+      },
+      {
+        label: 'Resell',
+        value: 'Resell'
+      }
+    ],
     opened: false,
     search: true,
     columns: [
-      {
-        name: 'SKU',
-        required: true,
-        label: 'SKU',
-        align: 'center',
-        field: 'SKU',
-        sortable: true
-      },
+      { name: 'type', required: true, label: 'Type', align: 'center', field: 'type', sortable: true },
+      { name: 'SKU', required: true, label: 'SKU', align: 'center', field: 'SKU', sortable: true },
       { name: 'description', label: 'Description', field: 'description', align: 'center', sortable: true },
     ],
     tableData: [
       {
+        type: 'Own',
         SKU: '123456',
         description: 'This is an example product',
       },
     ]
   }),
   methods: {
+    change_type: function () {
+      console.log(this.item.type)
+      this.item.recipe = this.item.type === 'Own'
+    },
     add_finished_goods: function () {
 
       this.tableData.push(this.item)

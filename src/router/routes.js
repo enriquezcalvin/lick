@@ -47,7 +47,7 @@ export default [
         component: () => import('pages/inventory'),
         children: [
           {
-            path: 'finished-goods',
+            path: '',
             component: () => import('pages/inventory/finished-goods')
           }
         ]
