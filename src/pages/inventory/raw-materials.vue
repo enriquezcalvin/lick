@@ -1,6 +1,5 @@
 <template>
   <q-page padding class="docs-table">
-    
     <q-table
       title="Raw Materials"
       :data="tableData"
@@ -38,7 +37,7 @@
 </style>
 
 <script>
-import { QTable, QTh,QTr, QTd, QTableColumns, QTooltip, QChip } from 'quasar'
+import { QTable, QTh, QTr, QTd, QTableColumns, QTooltip, QChip } from 'quasar'
 export default {
   components: {
     QTable,
@@ -78,7 +77,7 @@ export default {
         sodium: 87,
         calcium: '14%',
         iron: '1%'
-      },
+      }
     ]
   })
 }

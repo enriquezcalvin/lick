@@ -22,15 +22,15 @@ export default [
           }
         ]
       },
-      { 
-        path: 'raw-materials', 
+      {
+        path: 'raw-materials',
         component: () => import('pages/inventory'),
         children: [
           {
             path: '',
             component: () => import('pages/inventory/raw-materials')
           }
-        ] 
+        ]
       },
       {
         path: 'items',
@@ -51,9 +51,7 @@ export default [
             component: () => import('pages/inventory/finished-goods')
           }
         ]
-      },
-      
-      
+      }
     ]
   },
 

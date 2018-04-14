@@ -40,10 +40,9 @@
         <q-item to="/accounts">
           <q-item-side icon="fas fa-dollar-sign" />
           <q-item-main label="Sales and Accounting"/>
-        </q-item> 
+        </q-item>
       </q-list>
     </q-layout-drawer>
-
     <q-page-container>
       <router-view />
     </q-page-container>

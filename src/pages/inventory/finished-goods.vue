@@ -25,7 +25,7 @@
           </q-toolbar-title>
         </q-toolbar>
         <q-toolbar slot="footer">
-          <q-btn 
+          <q-btn
             label="Cancel"
             @click="opened = false"
             size="md"
@@ -61,7 +61,7 @@
                 icon-color="negative"
               >
                 <q-datetime v-model="item.bestBeforeDate" type="date" />
-              </q-field>  
+              </q-field>
             </div>
             <div class="q-mt-md">
               <q-field
@@ -77,18 +77,16 @@
             </div>
           </div>
         </div>
-        
       </q-modal-layout>
     </q-modal>
   </q-page>
-  
 </template>
 
 <style>
 </style>
 
 <script>
-import { QTable, QTh,QTr, QTd, QTableColumns, QModal, QModalLayout, QSearch, QDatetime } from 'quasar'
+import { QTable, QTh, QTr, QTd, QTableColumns, QModal, QModalLayout, QSearch, QDatetime } from 'quasar'
 export default {
   components: {
     QTable,
@@ -135,33 +133,26 @@ export default {
         bestBeforeDate: new Date(),
         batch: 1,
         shift: 2
-      },
+      }
     ]
   }),
   methods: {
     add_finished_goods: function () {
-
       this.tableData.push(this.item)
-      
       this.opened = false
-
       this.$q.notify({
-      // only required parameter is the message:
-      message: `New Item has been Added!`,
-
-      /*
-      * All parameters below are optional:
-      */
-
-      timeout: 3000, // in milliseconds; 0 means no timeout
-
-      // "type" adds a color and icon,
-      // so you don't need to specify them.
-      // Available values: 'positive', 'negative', 'warning', 'info'
-      type: 'positive',
-
-      color: 'positive',
-      textColor: 'black'
+        // only required parameter is the message:
+        message: `New Item has been Added!`,
+        /*
+        * All parameters below are optional:
+        */
+        timeout: 3000, // in milliseconds; 0 means no timeout
+        // "type" adds a color and icon,
+        // so you don't need to specify them.
+        // Available values: 'positive', 'negative', 'warning', 'info'
+        type: 'positive',
+        color: 'positive',
+        textColor: 'black'
       })
     }
   }

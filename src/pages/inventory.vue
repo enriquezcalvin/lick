@@ -6,7 +6,6 @@
       <q-route-tab slot="title" label="Raw Materials" icon="shopping basket" to="/inventory/raw-materials" />
     </q-tabs>
     <router-view />
-    
   </div>
 </template>
 
@@ -14,7 +13,7 @@
 </style>
 
 <script>
-import { QTabs, QTab, QBtn, QRouteTab } from 'quasar'
+import { QTabs, QBtn, QRouteTab } from 'quasar'
 export default {
   components: {
     QTabs,

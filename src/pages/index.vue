@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <img alt="Quasar logo" src="~assets/lick_logo.png">
+    Dashboard or frequently used functions will be put here!
   </q-page>
 </template>
 
