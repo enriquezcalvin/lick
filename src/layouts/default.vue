@@ -64,9 +64,13 @@
         inset-delimiter
       >
         <q-list-header>Modules</q-list-header>
+        <q-item to="/production">
+          <q-item-side icon="description" />
+          <q-item-main label="Production"/>
+        </q-item>
         <q-item to="/inventory">
           <q-item-side icon="description" />
-          <q-item-main label="Production and Inventory"/>
+          <q-item-main label="Inventory"/>
         </q-item>
         <q-item to="/accounts">
           <q-item-side icon="fas fa-dollar-sign" />
