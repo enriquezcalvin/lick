@@ -1,8 +1,8 @@
 {
-  "name": "quasar-test",
+  "name": "lick-mock",
   "version": "1.0.0",
   "description": "trying out quasar fw",
-  "productName": "quasar-test",
+  "productName": "Lick Mock Up",
   "cordovaId": "org.cordova.quasar.app",
   "author": "Calvin Enriquez",
   "private": true,

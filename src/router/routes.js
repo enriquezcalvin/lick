@@ -7,20 +7,13 @@ export default [
       { path: '', component: () => import('pages/index') }
     ]
   },
-
   {
     path: '/inventory',
     component: () => import('layouts/default'),
     children: [
       {
         path: '',
-        component: () => import('pages/inventory/'),
-        children: [
-          {
-            path: '',
-            component: () => import('pages/inventory/inventory')
-          }
-        ]
+        component: () => import('pages/inventory/')
       },
       {
         path: 'raw-materials',
@@ -60,6 +53,16 @@ export default [
     component: () => import('layouts/default'),
     children: [
       { path: '', component: () => import('pages/accounts') }
+    ]
+  },
+
+  {
+    path: '/signin',
+    component: () => import('layouts/default'),
+    children: [
+      {
+        path: '', component: () => import('pages/signin')
+      }
     ]
   },
 

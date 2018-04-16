@@ -20,9 +20,40 @@
           Lick Iced Tea
           <!--<div slot="subtitle">Running on Quasar v{{ $q.version }}</div>-->
         </q-toolbar-title>
+        <q-btn
+          flat
+          dense
+        >
+          <q-icon name="account circle" />
+          <q-popover
+            :anchor="anchor"
+            :self="self"
+          >
+            <q-list link style="min-width: 100px" v-if="loggedIn">
+              <q-item
+                v-for="n in 3"
+                :key="`b-${n}`"
+                v-close-overlay
+              >
+                <q-item-main label="Label " />
+              </q-item>
+              <q-item>
+                <q-icon name="exit to app" class="q-mr-md" />
+                <q-item-main label="Logout" />
+              </q-item>
+            </q-list>
+
+            <q-list link style="min-width: 100px" v-else>
+              <q-item @click.native="login = true">
+                <q-icon name="lock open" class="q-mr-md" />
+                <q-item-main label="Login" />
+              </q-item>
+            </q-list>
+          </q-popover>
+        </q-btn>
       </q-toolbar>
     </q-layout-header>
-
+    <login-modal :loginModal="login"></login-modal>
     <q-layout-drawer
       v-model="leftDrawerOpen"
       :content-class="$q.theme === 'mat' ? 'bg-grey-2' : null"
@@ -50,13 +81,32 @@
 </template>
 
 <script>
-import { openURL } from 'quasar'
-
+import { openURL, QPopover } from 'quasar'
+import LoginModal from 'components/User/LoginModal'
 export default {
+  components: {
+    QPopover,
+    LoginModal
+  },
   name: 'LayoutDefault',
   data () {
     return {
-      leftDrawerOpen: this.$q.platform.is.desktop
+      leftDrawerOpen: this.$q.platform.is.desktop,
+      anchorOrigin: {vertical: 'bottom', horizontal: 'left'},
+      selfOrigin: {vertical: 'top', horizontal: 'left'},
+      popover: false,
+      login: false
+    }
+  },
+  computed: {
+    loggedIn () {
+      return this.$store.getters.user !== null && this.$store.getters.user !== undefined
+    },
+    anchor () {
+      return `${this.anchorOrigin.vertical} ${this.anchorOrigin.horizontal}`
+    },
+    self () {
+      return `${this.selfOrigin.vertical} ${this.selfOrigin.horizontal}`
     }
   },
   methods: {

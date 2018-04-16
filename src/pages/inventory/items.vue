@@ -119,7 +119,8 @@ export default {
       { name: 'type', required: true, label: 'Type', align: 'center', field: 'type', sortable: true },
       { name: 'SKU', required: true, label: 'SKU', align: 'center', field: 'SKU', sortable: true },
       { name: 'description', label: 'Description', field: 'description', align: 'center', sortable: true }
-    ],
+    ]
+    /*
     tableData: [
       {
         type: 'Own',
@@ -127,22 +128,34 @@ export default {
         description: 'This is an example product'
       }
     ]
+    */
   }),
+  created () {
+    this.$store.dispatch('item/loadItems')
+  },
+  computed: {
+    tableData () {
+      return this.$store.getters['item/getItems']
+    }
+  },
   methods: {
     change_type: function () {
       console.log(this.item.type)
       this.item.recipe = this.item.type === 'Own'
     },
     add_finished_goods: function () {
-      this.tableData.push(this.item)
-      this.opened = false
-      this.$q.notify({
-        message: `New Item has been Added!`,
-        timeout: 3000, // in milliseconds; 0 means no timeout
-        type: 'positive',
-        color: 'positive',
-        textColor: 'black'
-      })
+      // this.tableData.push(this.item)
+      this.$store.dispatch('item/createItem', this.item)
+        .then((response) => {
+          this.opened = false
+          this.$q.notify({
+            message: `New Item has been Added!`,
+            timeout: 3000, // in milliseconds; 0 means no timeout
+            type: 'positive',
+            color: 'positive',
+            textColor: 'black'
+          })
+        })
     }
   }
 }
