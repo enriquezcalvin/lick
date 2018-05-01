@@ -1,37 +1,71 @@
-import firebase from 'firebase'
+import Vue from 'vue'
+export const loadDummy = ({commit}, payload) => {
+  const materials = [
+    {
+      code: 'ABC',
+      name: 'sugar',
+      totalQuantity: '21',
+      items: [
+        {
+          lot: 'omg',
+          quantity: '10',
+          unit: 'kg',
+          supplier: 'supplier 1',
+          vat: true,
+          purchaseDate: 'Jan 1 1923',
+          purchaseOrderNo: 'PO123',
+          unitCost: '10.5',
+          totalAmount: '105'
+        },
+        {
+          lot: 'omg1',
+          quantity: '11',
+          unit: 'kg',
+          supplier: 'supplier 2',
+          vat: true,
+          purchaseDate: 'Jan 1 1944',
+          purchaseOrderNo: 'PO124',
+          unitCost: '11',
+          totalAmount: '121'
+        }
+      ]
+    }
+  ]
+  console.log(materials)
+  commit('setRawMaterials', materials)
+}
 
 export const createRawMaterial = ({commit}, payload) => {
-  firebase.database().ref('raw-materials').push(payload)
+  Vue.prototype.$firestore.collection('raw-materials').add(payload)
     .catch((error) => {
       console.log(error)
     })
-    .then((data) => {
-      console.log(data)
+    .then((docRef) => {
+      commit('addRawMaterial', {id: docRef.id, ...payload})
     })
 }
 
-export const loadRawMaterials = ({commit}, payload) => {
-  firebase.database().ref('raw-materials').once('value')
+export const loadRawMaterials = async ({commit}, payload) => {
+  Vue.prototype.$firestore.collection('raw-materials').get()
     .then((data) => {
       const materials = []
-      const obj = data.val()
-      for (let key in obj) {
+      data.forEach(function (doc) {
         materials.push({
-          id: key,
-          code: obj[key].code,
-          name: obj[key].name,
-          lot: obj[key].lot,
-          quantity: obj[key].quantity,
-          unit: obj[key].unit,
-          supplier: obj[key].supplier,
-          vat: obj[key].vat,
-          purchaseDate: obj[key].purchaseDate,
-          purchaseOrderNo: obj[key].purchaseOrderNo,
-          unitCost: obj[key].unitCost,
-          totalAmount: obj[key].totalAmount
+          id: doc.id,
+          ...doc.data()
         })
-      }
+      })
       commit('setRawMaterials', materials)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
+}
+
+export const deleteRawMaterial = async ({commit}, payload) => {
+  Vue.prototype.$firestore.collection('raw-materials').doc(payload).delete()
+    .then((data) => {
+      commit('deleteRawMaterial', payload)
     })
     .catch((error) => {
       console.log(error)

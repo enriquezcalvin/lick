@@ -4,70 +4,78 @@
       title="Raw Materials"
       :data="tableData"
       :columns="columns"
-      selection="multiple"
-      :selected.sync="selected"
-      row-key="id"
+      row-key="name"
       no-data-label="Loading your data! Please wait..."
     >
       <div slot="top-right" slot-scope="props">
-        <q-btn
-          color="primary"
-          size="sm"
-          label="Add Materials"
-          icon="add"
-          class="q-mb-sm"
-          @click="opened = true"
-        />
-      </div>
-      <q-tr slot="header" slot-scope="props">
-        <q-th auto-width>
-          <q-checkbox
-            v-if="props.multipleSelect"
-            v-model="props.selected"
-            indeterminate-value="some"
+        <div class="column">
+          <q-btn
+            color="primary"
+            size="md"
+            label="Add Materials"
+            icon="add"
+            class="q-mb-sm"
+            @click="opened = true"
           />
-        </q-th>
-        <q-th v-for="col in props.cols" :key="col.name" :props="props">
-          {{ col.label }}
-        </q-th>
-      </q-tr>
+          <div class="row">
+            <q-btn color="secondary" icon="create" label="Edit" size="md" class="q-mr-sm" :disable="selected.length != 1"/>
+            <q-btn color="negative" icon="delete" label="Delete" size="md" :disabled="selected.length != 1" @click="delete_materials"/>
+          </div>
+        </div>
+      </div>
       <template slot="body" slot-scope="props">
         <q-tr :props="props">
-          <q-td auto-width>
-            <q-checkbox color="primary" v-model="props.selected" />
-          </q-td>
           <q-td key="code" :props="props">
             <q-checkbox color="primary" v-model="props.expand" checked-icon="remove" unchecked-icon="add" class="q-mr-md" />
             {{ props.row.code }}
           </q-td>
           <q-td key="name" :props="props">{{ props.row.name }}</q-td>
-          <q-td key="lot" :props="props">{{ props.row.lot }}</q-td>
-          <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
-          <q-td key="unit" :props="props">{{ props.row.unit }}</q-td>
-          <q-td key="supplier" :props="props">{{ props.row.supplier }}</q-td>
-          <q-td key="vat" :props="props">{{ props.row.vat }}</q-td>
-          <q-td key="purchaseDate" :props="props">
-            <q-chip small square color="amber">{{ props.row.purchaseDate }}</q-chip>
-          </q-td>
-          <q-td key="purchaseOrderNo" :props="props">
-            <q-chip small square color="amber">{{ props.row.purchaseOrderNo }}</q-chip>
-          </q-td>
-          <q-td key="unitCost" :props="props">
-            <q-chip small square color="amber">{{ props.row.unitCost }}</q-chip>
-          </q-td>
-          <q-td key="totalAmount" :props="props">
-            <q-chip small square color="amber">{{ props.row.totalAmount }}</q-chip>
-          </q-td>
+          <q-td key="totalQuantity" :props="props">{{ props.row.totalQuantity }}</q-td>
         </q-tr>
         <q-tr v-show="props.expand" :props="props">
           <q-td colspan="100%">
-            <div class="text-left">This is expand slot for row above: {{ props.row.unitCost }}.</div>
+            <q-table
+              :data="props.row.items"
+              :columns="columns2"
+              selection="multiple"
+              :selected.sync="selected"
+              row-key="id"
+              no-data-label="Loading your data! Please wait..."
+            >
+              <q-tr slot="header" slot-scope="props">
+                <q-th auto-width>
+                  <q-checkbox
+                    v-if="props.multipleSelect"
+                    v-model="props.selected"
+                    indeterminate-value="some"
+                  />
+                </q-th>
+                <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                  {{ col.label }}
+                </q-th>
+              </q-tr>
+              <template slot="body" slot-scope="props">
+                <q-tr :props="props">
+                  <q-td auto-width>
+                    <q-checkbox color="primary" v-model="props.selected" />
+                  </q-td>
+                  <q-td key="lot" :props="props">{{ props.row.lot }}</q-td>
+                  <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
+                  <q-td key="unit" :props="props">{{ props.row.unit }}</q-td>
+                  <q-td key="supplier" :props="props">{{ props.row.supplier }}</q-td>
+                  <q-td key="vat" :props="props">{{ props.row.vat }}</q-td>
+                  <q-td key="purchaseDate" :props="props">{{ props.row.purchaseDate }}</q-td>
+                  <q-td key="purchaseOrderNo" :props="props">{{ props.row.purchaseOrderNo }}</q-td>
+                  <q-td key="unitCost" :props="props">{{ props.row.unitCost }}</q-td>
+                  <q-td key="totalAmount" :props="props">{{ props.row.totalAmount }}</q-td>
+                </q-tr>
+              </template>
+            </q-table>
           </q-td>
         </q-tr>
       </template>
-
     </q-table>
-    <q-modal v-model="opened" :content-css="{minWidth: '60vw', minHeight: '60vh'}">
+    <q-modal v-model="opened" :content-css="{minWidth: '60vw', minHeight: '65vh'}">
       <q-modal-layout>
         <q-toolbar slot="header">
           <q-toolbar-title>
@@ -125,7 +133,7 @@
             <div class="q-mt-md">
               <q-field
               >
-                <q-input v-model="material.supplier" float-label="supplier (might need to change to select)" />
+                <q-input v-model="material.description" type="textarea" float-label="Description"/>
               </q-field>
             </div>
           </div>
@@ -134,6 +142,18 @@
               <q-field
               >
                 <q-datetime v-model="material.purchaseDate" type="date" float-label="Date of Purchase"/>
+              </q-field>
+            </div>
+            <div class="q-mt-md">
+              <q-field
+              >
+                <q-input v-model="material.supplier" float-label="supplier (might need to change to select)" />
+              </q-field>
+            </div>
+            <div class="q-mt-md">
+              <q-field
+              >
+                <q-input v-model="material.SKU" float-label="SKU" />
               </q-field>
             </div>
             <div class="q-mt-md">
@@ -199,17 +219,24 @@ export default {
       lot: '',
       quantity: 0,
       unit: '',
+      description: '',
       supplier: '',
       vat: true,
       purchaseDate: Date.now(),
       purchaseOrderNo: '',
       unitCost: 0.0,
-      totalAmount: 0
+      totalAmount: 0,
+      date_created: Date.now(),
+      date_updated: Date.now(),
+      SKU: ''
     },
     selected: [],
     columns: [
-      { name: 'code', label: 'Item Code', align: 'center', field: 'code', sortable: true },
-      { name: 'name', label: 'Item Name', align: 'center', field: 'name', sortable: true },
+      { name: 'code', label: 'Item Code', align: 'left', field: 'code', sortable: true },
+      { name: 'name', label: 'Item Name', align: 'left', field: 'name', sortable: true },
+      { name: 'totalQuantity', label: 'Total Quantity', align: 'left', field: 'total', sortable: true }
+    ],
+    columns2: [
       { name: 'lot', label: 'Lot #', align: 'center', field: 'lot', sortable: true },
       { name: 'quantity', label: 'Quantity', align: 'center', field: 'quantity', sortable: true },
       { name: 'unit', label: 'Unit of Measurement', align: 'center', field: 'unit', sortable: true },
@@ -223,6 +250,7 @@ export default {
   }),
   created () {
     this.$store.dispatch('RawMaterials/loadRawMaterials')
+    // this.$store.dispatch('RawMaterials/loadDummy')
   },
   computed: {
     tableData () {
@@ -255,6 +283,36 @@ export default {
         .catch((error) => {
           console.log(error)
         })
+    },
+    delete_materials: function () {
+      this.$q.dialog({
+        title: 'Confirmation',
+        message: 'Are you sure you want to delete this material?',
+        ok: 'Yes',
+        cancel: 'No'
+      }).then(() => {
+        console.log('came here')
+        this.$store.dispatch('RawMaterials/deleteRawMaterial', this.selected[0].id)
+          .then((data) => {
+            this.$q.notify({
+              message: `Selected Material has been Deleted!`,
+              timeout: 3000,
+              type: 'negative',
+              color: 'negative',
+              textColor: 'black'
+            })
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+      }).catch(() => {
+        this.$q.notify({
+          message: `Delete Aborted`,
+          timeout: 3000,
+          color: 'secondary',
+          textColor: 'black'
+        })
+      })
     }
   }
 }

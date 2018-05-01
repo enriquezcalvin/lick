@@ -1,3 +1,5 @@
+import { groupByNameAndCode } from '../../helpers/groupBy'
+
 export const getRawMaterials = (state) => {
-  return state.rawMaterials
+  return groupByNameAndCode(state.rawMaterials)
 }
