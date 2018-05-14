@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import {date} from 'quasar'
 export const loadDummy = ({commit}, payload) => {
   const materials = [
     {
@@ -50,9 +51,13 @@ export const loadRawMaterials = async ({commit}, payload) => {
     .then((data) => {
       const materials = []
       data.forEach(function (doc) {
+        let {purchaseDate, ...material} = doc.data()
+        let materialPurchaseDate = date.formatDate(doc.data().purchaseDate, 'MMM-DD-YYYY')
+        console.log(material, materialPurchaseDate)
         materials.push({
           id: doc.id,
-          ...doc.data()
+          ...material,
+          purchaseDate: materialPurchaseDate
         })
       })
       commit('setRawMaterials', materials)

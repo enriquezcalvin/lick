@@ -30,6 +30,7 @@
             {{ props.row.code }}
           </q-td>
           <q-td key="name" :props="props">{{ props.row.name }}</q-td>
+          <q-td key="SKU" :props="props">{{ props.row.SKU }}</q-td>
           <q-td key="totalQuantity" :props="props">{{ props.row.totalQuantity }}</q-td>
         </q-tr>
         <q-tr v-show="props.expand" :props="props">
@@ -60,14 +61,14 @@
                     <q-checkbox color="primary" v-model="props.selected" />
                   </q-td>
                   <q-td key="lot" :props="props">{{ props.row.lot }}</q-td>
-                  <q-td key="quantity" :props="props">{{ props.row.quantity }}</q-td>
+                  <q-td key="quantity" :props="props">{{ parseFloat(props.row.quantity).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</q-td>
                   <q-td key="unit" :props="props">{{ props.row.unit }}</q-td>
                   <q-td key="supplier" :props="props">{{ props.row.supplier }}</q-td>
-                  <q-td key="vat" :props="props">{{ props.row.vat }}</q-td>
+                  <q-td key="vat" :props="props">{{ props.row.vat ? 'Vat Inc.' : 'Vat Ex.' }}</q-td>
                   <q-td key="purchaseDate" :props="props">{{ props.row.purchaseDate }}</q-td>
                   <q-td key="purchaseOrderNo" :props="props">{{ props.row.purchaseOrderNo }}</q-td>
-                  <q-td key="unitCost" :props="props">{{ props.row.unitCost }}</q-td>
-                  <q-td key="totalAmount" :props="props">{{ props.row.totalAmount }}</q-td>
+                  <q-td key="unitCost" :props="props">{{ parseFloat(props.row.unitCost).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' }) }}</q-td>
+                  <q-td key="totalAmount" :props="props">{{ parseFloat(props.row.totalAmount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</q-td>
                 </q-tr>
               </template>
             </q-table>
@@ -91,25 +92,36 @@
           />
           <q-btn
             label="Add!"
-            @click="add_raw_materials"
+            @click="add_suppliers"
             size="md"
             class="q-mx-md"
             color="positive"
             :loading="loading"
+            :disabled="$v.$invalid"
           />
         </q-toolbar>
         <div class="layout-padding row gutter-x-md">
           <div class="col-md-6 col-sm-12">
             <div class="q-mt-md">
               <q-field
+                :error="$v.material.code.$error"
+                error-label="This field is required!"
               >
-                <q-input v-model="material.code" float-label="Code" />
+                <q-input v-model="material.code" float-label="Code" @blur="$v.material.code.$touch" />
               </q-field>
             </div>
             <div class="q-mt-md">
               <q-field
+                :error="$v.material.name.$error"
+                error-label="This field is required!"
               >
-                <q-input v-model="material.name" float-label="Name" />
+                <q-input v-model="material.name" float-label="Name" @blur="$v.material.name.$touch">
+                  <q-autocomplete
+                    @search="searchMaterial"
+                    :min-characters="2"
+                    @selected="selectedMaterialName"
+                  />
+                </q-input>
               </q-field>
             </div>
             <div class="q-mt-md">
@@ -120,8 +132,10 @@
             </div>
             <div class="q-mt-md">
               <q-field
+                :error="$v.material.quantity.$error"
+                error-label="This field is required!"
               >
-                <q-input v-model="material.quantity" float-label="Quantity" />
+                <q-input v-model="material.quantity" float-label="Quantity" @blur="$v.material.quantity.$touch" />
               </q-field>
             </div>
             <div class="q-mt-md">
@@ -165,7 +179,7 @@
             <div class="q-mt-md">
               <q-field
               >
-                <q-input v-model="material.unitCost" float-label="Unit Cost" />
+                <q-input type="number" v-model="material.unitCost" float-label="Unit Cost" />
               </q-field>
             </div>
             <div class="q-mt-md">
@@ -177,7 +191,7 @@
             <div class="q-mt-md">
               <q-field
               >
-                <q-input readonly v-model="material.totalAmount" float-label="Total Amount" />
+                <q-input type="number" readonly v-model="material.totalAmount" float-label="Total Amount" />
               </q-field>
             </div>
           </div>
@@ -191,7 +205,8 @@
 </style>
 
 <script>
-import { QTable, QTh, QTr, QTd, QTableColumns, QTooltip, QChip, QModal, QModalLayout, QSearch, QDatetime, QSelect, QToggle, QCheckbox } from 'quasar'
+import { QTable, QTh, QTr, QTd, QTableColumns, QTooltip, QChip, QModal, QModalLayout, QSearch, QDatetime, QSelect, QToggle, QCheckbox, filter, QAutocomplete } from 'quasar'
+import { required } from 'vuelidate/lib/validators'
 export default {
   components: {
     QTable,
@@ -207,7 +222,8 @@ export default {
     QDatetime,
     QSelect,
     QToggle,
-    QCheckbox
+    QCheckbox,
+    QAutocomplete
   },
   name: 'FinishedProducts',
   data: () => ({
@@ -234,6 +250,7 @@ export default {
     columns: [
       { name: 'code', label: 'Item Code', align: 'left', field: 'code', sortable: true },
       { name: 'name', label: 'Item Name', align: 'left', field: 'name', sortable: true },
+      { name: 'SKU', label: 'SKU', align: 'left', field: 'SKU', sortable: true },
       { name: 'totalQuantity', label: 'Total Quantity', align: 'left', field: 'total', sortable: true }
     ],
     columns2: [
@@ -248,6 +265,14 @@ export default {
       { name: 'totalAmount', label: 'Total Amount', align: 'center', field: 'totalAmount', sortable: true }
     ]
   }),
+  validations: {
+    material: {
+      code: {required},
+      name: {required},
+      quantity: {required}
+    }
+
+  },
   created () {
     this.$store.dispatch('RawMaterials/loadRawMaterials')
     // this.$store.dispatch('RawMaterials/loadDummy')
@@ -255,17 +280,40 @@ export default {
   computed: {
     tableData () {
       return this.$store.getters['RawMaterials/getRawMaterials']
+    },
+    minimizedData () {
+      return this.tableData.map(item => {
+        return {
+          label: item.name,
+          code: item.code,
+          value: item.name
+        }
+      })
     }
   },
   watch: {
     'material.unitCost': function (val) {
       this.material.totalAmount = val * this.material.quantity
+      if (this.material.vat) {
+        this.material.totalAmount *= 1.12
+      }
+      this.material.totalAmount = this.material.totalAmount.toFixed(2)
     },
     'material.quantity': function (val) {
       this.material.totalAmount = val * this.material.unitCost
+      if (this.material.vat) {
+        this.material.totalAmount *= 1.12
+      }
+      this.material.totalAmount = this.material.totalAmount.toFixed(2)
     }
   },
   methods: {
+    searchMaterial: function (terms, done) {
+      done(filter(terms, {field: 'value', list: this.minimizedData}))
+    },
+    selectedMaterialName: function (item) {
+      this.material.code = `${item.code}`
+    },
     add_raw_materials: function () {
       this.loading = true
       this.$store.dispatch('RawMaterials/createRawMaterial', this.material)

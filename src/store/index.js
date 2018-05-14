@@ -5,6 +5,7 @@ import user from './user'
 import RawMaterials from './RawMaterials'
 import PackagingMaterials from './PackagingMaterials'
 import OtherMaterials from './OtherMaterials'
+import Suppliers from './Suppliers'
 
 Vue.use(Vuex)
 
@@ -13,7 +14,8 @@ const store = new Vuex.Store({
     user,
     RawMaterials,
     PackagingMaterials,
-    OtherMaterials
+    OtherMaterials,
+    Suppliers
   }
 })
 
