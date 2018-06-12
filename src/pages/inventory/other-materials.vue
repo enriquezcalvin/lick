@@ -203,7 +203,7 @@ export default {
     QToggle,
     QCheckbox
   },
-  name: 'FinishedProducts',
+  name: 'InventoryOtherMaterials',
   data: () => ({
     loading: false,
     opened: false,
@@ -243,8 +243,7 @@ export default {
     ]
   }),
   created () {
-    this.$store.dispatch('OtherMaterials/loadOtherMaterials')
-    // this.$store.dispatch('OtherMaterials/loadDummy')
+    //
   },
   computed: {
     tableData () {

@@ -60,25 +60,37 @@
                 <q-input v-model="supplier.name" float-label="Name" @blur="$v.supplier.name.$touch" />
               </q-field>
             </div>
-            <div class="q-mt-md">
+            <div class="q-mt-md q-ml-md">
               <q-field
               >
-                <q-input v-model="supplier.address" float-label="Address" />
+                <div v-for="(item, index) in supplier.addresses" :key="index">
+                  <q-input v-model="item.address" float-label="Address" />
+                </div>
               </q-field>
+              <q-btn class="q-mt-sm" color="positive" label="Add Address" v-if="supplier.addresses.length < 2" @click="add_supplier_address" />
+              <q-btn class="q-mt-sm" color="negative" label="Remove Address" v-if="supplier.addresses.length > 1" @click="remove_supplier_address" />
             </div>
           </div>
           <div class="col-md-6 col-sm-12 ">
             <div class="q-mt-md">
               <q-field
               >
-                <q-input v-model="supplier.contact" float-label="Contact" />
+                <div v-for="(item, index) in supplier.contacts" :key="index">
+                  <q-input v-model="item.contact" float-label="Contact Person" />
+                </div>
               </q-field>
+              <q-btn class="q-mt-sm" color="positive" label="Add Contact Person" v-if="supplier.contacts.length < 4" @click="add_supplier_contact" />
+              <q-btn class="q-mt-sm" color="negative" label="Remove Contact Person" v-if="supplier.contacts.length > 1" @click="remove_supplier_contact" />
             </div>
             <div class="q-mt-md">
               <q-field
               >
-                <q-input v-model="supplier.number" float-label="Number" />
+                <div v-for="(item, index) in supplier.numbers" :key="index">
+                  <q-input v-model="item.number" float-label="Number" @blur="check_number_format(index)"/>
+                </div>
               </q-field>
+              <q-btn class="q-mt-sm" color="positive" label="Add Number" v-if="supplier.numbers.length" @click="add_supplier_number" />
+              <q-btn class="q-mt-sm" color="negative" label="Remove Number" v-if="supplier.numbers.length > 1" @click="remove_supplier_number" />
             </div>
             <div class="q-mt-md">
               <q-field
@@ -125,10 +137,10 @@ export default {
     opened: false,
     supplier: {
       name: '',
-      address: '',
-      contact: '',
-      number: '',
-      email: ''
+      addresses: [{ address: '' }],
+      contacts: [{ contact: '' }],
+      numbers: [{ number: '' }],
+      emails: [{ email: '' }]
     },
     selected: [],
     columns: [
@@ -147,7 +159,6 @@ export default {
     }
   },
   created () {
-    this.$store.dispatch('Suppliers/loadSuppliers')
     // this.$store.dispatch('RawMaterials/loadDummy')
   },
   computed: {
@@ -156,6 +167,46 @@ export default {
     }
   },
   methods: {
+    check_number_format: function (key) {
+      if (this.supplier.numbers[key].number.length === 7) {
+        console.log(key)
+        this.supplier.numbers[key].number = '02-' + this.supplier.numbers[key].number
+      } else if (this.supplier.numbers[key].number.length === 10 && this.supplier.numbers[key].number[0] === '9') {
+        console.log(key)
+        this.supplier.numbers[key].number = '0' + this.supplier.numbers[key].number
+        this.supplier.numbers[key].number = this.supplier.numbers[key].number.substr(0, 4) + '-' + this.supplier.numbers[key].number.substr(4)
+      } else if (this.supplier.numbers[key].number.length === 11) {
+        console.log(key)
+        this.supplier.numbers[key].number = '' + this.supplier.numbers[key].number
+        this.supplier.numbers[key].number = this.supplier.numbers[key].number.substr(0, 4) + '-' + this.supplier.numbers[key].number.substr(4)
+      } else if (this.supplier.numbers[key].number.length === 12) {
+        console.log(key)
+        this.supplier.numbers[key].number = '' + this.supplier.numbers[key].number
+        this.supplier.numbers[key].number = '0' + this.supplier.numbers[key].number.substr(2, 3) + '-' + this.supplier.numbers[key].number.substr(5)
+      } else if (this.supplier.numbers[key].number.length === 13) {
+        console.log(key)
+        this.supplier.numbers[key].number = '' + this.supplier.numbers[key].number
+        this.supplier.numbers[key].number = '0' + this.supplier.numbers[key].number.substr(3, 3) + '-' + this.supplier.numbers[key].number.substr(6)
+      }
+    },
+    add_supplier_address: function () {
+      this.supplier.addresses.push({ address: '' })
+    },
+    remove_supplier_address: function () {
+      this.supplier.addresses.pop()
+    },
+    add_supplier_contact: function () {
+      this.supplier.contacts.push({ contact: '' })
+    },
+    remove_supplier_contact: function () {
+      this.supplier.contacts.pop()
+    },
+    add_supplier_number: function () {
+      this.supplier.numbers.push({ number: '' })
+    },
+    remove_supplier_number: function () {
+      this.supplier.numbers.pop()
+    },
     add_suppliers: function () {
       this.loading = true
       this.$store.dispatch('Suppliers/createSupplier', this.supplier)

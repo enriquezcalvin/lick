@@ -44,7 +44,13 @@ export default [
       },
       {
         path: 'production',
-        component: () => import('pages/production')
+        component: () => import('pages/production'),
+        children: [
+          {
+            path: 'compute-requirements',
+            component: () => import('pages/production/compute-requirements')
+          }
+        ]
       },
       {
         path: 'sales',

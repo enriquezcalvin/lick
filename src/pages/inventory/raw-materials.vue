@@ -15,10 +15,10 @@
             label="Add Materials"
             icon="add"
             class="q-mb-sm"
-            @click="opened = true"
+            @click="create_modal"
           />
           <div class="row">
-            <q-btn color="secondary" icon="create" label="Edit" size="md" class="q-mr-sm" :disable="selected.length != 1"/>
+            <q-btn color="secondary" icon="create" label="Edit" size="md" class="q-mr-sm" :disable="selected.length != 1" @click="edit_material"/>
             <q-btn color="negative" icon="delete" label="Delete" size="md" :disabled="selected.length != 1" @click="delete_materials"/>
           </div>
         </div>
@@ -31,7 +31,7 @@
           </q-td>
           <q-td key="name" :props="props">{{ props.row.name }}</q-td>
           <q-td key="SKU" :props="props">{{ props.row.SKU }}</q-td>
-          <q-td key="totalQuantity" :props="props">{{ props.row.totalQuantity }}</q-td>
+          <q-td key="totalQuantity" :props="props">{{ parseFloat(props.row.totalQuantity).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}</q-td>
         </q-tr>
         <q-tr v-show="props.expand" :props="props">
           <q-td colspan="100%">
@@ -80,24 +80,35 @@
       <q-modal-layout>
         <q-toolbar slot="header">
           <q-toolbar-title>
-            Add Raw Material!
+            {{action}} Raw Material!
           </q-toolbar-title>
         </q-toolbar>
-        <q-toolbar slot="footer">
-          <q-btn
-            label="Cancel"
-            @click="opened = false"
-            size="md"
-            color="negative"
-          />
+        <q-toolbar class="justify-center" slot="footer">
           <q-btn
             label="Add!"
-            @click="add_suppliers"
-            size="md"
-            class="q-mx-md"
+            @click="add_raw_materials"
+            size="lg"
+            class="q-mx-lg"
             color="positive"
             :loading="loading"
             :disabled="$v.$invalid"
+            v-if="adding"
+          />
+          <q-btn
+            label="Update!"
+            @click="edit_raw_materials"
+            size="lg"
+            class="q-mx-lg"
+            color="positive"
+            :loading="loading"
+            :disabled="$v.$invalid"
+            v-else
+          />
+          <q-btn
+            label="Cancel"
+            @click="opened = false"
+            size="lg"
+            color="negative"
           />
         </q-toolbar>
         <div class="layout-padding row gutter-x-md">
@@ -107,7 +118,7 @@
                 :error="$v.material.code.$error"
                 error-label="This field is required!"
               >
-                <q-input v-model="material.code" float-label="Code" @blur="$v.material.code.$touch" />
+                <q-input v-model="material.code" float-label="Item Code" @blur="$v.material.code.$touch" />
               </q-field>
             </div>
             <div class="q-mt-md">
@@ -115,7 +126,7 @@
                 :error="$v.material.name.$error"
                 error-label="This field is required!"
               >
-                <q-input v-model="material.name" float-label="Name" @blur="$v.material.name.$touch">
+                <q-input v-model="material.name" float-label="Item Name" @blur="$v.material.name.$touch">
                   <q-autocomplete
                     @search="searchMaterial"
                     :min-characters="2"
@@ -135,13 +146,14 @@
                 :error="$v.material.quantity.$error"
                 error-label="This field is required!"
               >
-                <q-input v-model="material.quantity" float-label="Quantity" @blur="$v.material.quantity.$touch" />
+                <q-input v-model="material.quantity" type="number" lang="en-PH" float-label="Quantity" @blur="$v.material.quantity.$touch" />
               </q-field>
             </div>
             <div class="q-mt-md">
               <q-field
               >
-                <q-input v-model="material.unit" float-label="Unit of Measurement" />
+                <q-select v-model="material.unit" filter :options="unitList" placeholder="Unit of Measurement">
+                </q-select>
               </q-field>
             </div>
             <div class="q-mt-md">
@@ -161,7 +173,8 @@
             <div class="q-mt-md">
               <q-field
               >
-                <q-input v-model="material.supplier" float-label="supplier (might need to change to select)" />
+                <q-select v-model="material.supplier" filter :options="supplierList" placeholder="Supplier">
+                </q-select>
               </q-field>
             </div>
             <div class="q-mt-md">
@@ -225,10 +238,21 @@ export default {
     QCheckbox,
     QAutocomplete
   },
-  name: 'FinishedProducts',
+  name: 'InventoryRawMaterials',
   data: () => ({
     loading: false,
     opened: false,
+    adding: false,
+    action: '',
+    unitList: [{label: 'kg', value: 'kg'},
+      {label: 'g', value: 'g'},
+      {label: 'l', value: 'l'},
+      {label: 'ml', value: 'ml'},
+      {label: 'pcs.', value: 'pcs.'},
+      {label: 'boxes', value: 'boxes'},
+      {label: 'pcks.', value: 'pcks.'},
+      {label: 'cs.', value: 'cs.'}
+    ],
     material: {
       code: '',
       name: '',
@@ -242,8 +266,8 @@ export default {
       purchaseOrderNo: '',
       unitCost: 0.0,
       totalAmount: 0,
-      date_created: Date.now(),
-      date_updated: Date.now(),
+      dateCreated: Date.now(),
+      dateUpdated: Date.now(),
       SKU: ''
     },
     selected: [],
@@ -271,15 +295,16 @@ export default {
       name: {required},
       quantity: {required}
     }
-
   },
   created () {
-    this.$store.dispatch('RawMaterials/loadRawMaterials')
-    // this.$store.dispatch('RawMaterials/loadDummy')
+    //
   },
   computed: {
     tableData () {
       return this.$store.getters['RawMaterials/getRawMaterials']
+    },
+    supplierList () {
+      return this.$store.getters['Suppliers/getSupplierList']
     },
     minimizedData () {
       return this.tableData.map(item => {
@@ -292,6 +317,15 @@ export default {
     }
   },
   watch: {
+    'material.code': function (val) {
+      this.material.SKU = val + '-' + this.material.supplier + '-' + this.material.lot
+    },
+    'material.supplier': function (val) {
+      this.material.SKU = this.material.code + '-' + val + '-' + this.material.lot
+    },
+    'material.lot': function (val) {
+      this.material.SKU = this.material.code + '-' + this.material.supplier + '-' + val
+    },
     'material.unitCost': function (val) {
       this.material.totalAmount = val * this.material.quantity
       if (this.material.vat) {
@@ -305,14 +339,93 @@ export default {
         this.material.totalAmount *= 1.12
       }
       this.material.totalAmount = this.material.totalAmount.toFixed(2)
+      console.log(parseFloat(this.material.quantity).toLocaleString('en-PH'))
+      this.material.quantity = parseFloat(this.material.quantity).toLocaleString('en-PH')
+    },
+    'material.vat': function (val) {
+      this.material.totalAmount = this.material.quantity * this.material.unitCost
+      if (val) {
+        this.material.totalAmount *= 1.12
+      }
+      this.material.totalAmount = this.material.totalAmount.toFixed(2)
     }
   },
   methods: {
+    create_modal: function () {
+      this.opened = true
+      this.action = 'Add'
+      this.adding = true
+      this.material = {
+        code: '',
+        name: '',
+        lot: '',
+        quantity: 0,
+        unit: '',
+        description: '',
+        supplier: '',
+        vat: true,
+        purchaseDate: Date.now(),
+        purchaseOrderNo: '',
+        unitCost: 0.0,
+        totalAmount: 0,
+        dateCreated: Date.now(),
+        dateUpdated: Date.now(),
+        SKU: ''
+      }
+    },
+    searchSupplier: function (terms, done) {
+      done(filter(terms, {field: 'label', list: this.supplierList}))
+    },
+    selectedSupplierName: function (item) {
+      this.material.supplier = `${item.value}`
+    },
     searchMaterial: function (terms, done) {
       done(filter(terms, {field: 'value', list: this.minimizedData}))
     },
     selectedMaterialName: function (item) {
       this.material.code = `${item.code}`
+    },
+    edit_material: function () {
+      this.material = this.selected[0]
+      this.opened = true
+      this.adding = false
+      this.action = 'Edit'
+    },
+    edit_raw_materials: function () {
+      this.loading = true
+      this.$store.dispatch('RawMaterials/updateRawMaterial', this.material)
+        .then((data) => {
+          this.selected = []
+          this.opened = false
+          this.loading = false
+          this.$q.notify({
+            message: `Material has been Updated!`,
+            timeout: 3000, // in milliseconds; 0 means no timeout
+            type: 'positive',
+            color: 'positive',
+            textColor: 'black'
+          })
+          this.material = {
+            code: '',
+            name: '',
+            lot: '',
+            quantity: 0,
+            unit: '',
+            description: '',
+            supplier: '',
+            vat: true,
+            purchaseDate: Date.now(),
+            purchaseOrderNo: '',
+            unitCost: 0.0,
+            totalAmount: 0,
+            dateCreated: Date.now(),
+            dateUpdated: Date.now(),
+            SKU: ''
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     },
     add_raw_materials: function () {
       this.loading = true
@@ -327,6 +440,23 @@ export default {
             color: 'positive',
             textColor: 'black'
           })
+          this.material = {
+            code: '',
+            name: '',
+            lot: '',
+            quantity: 0,
+            unit: '',
+            description: '',
+            supplier: '',
+            vat: true,
+            purchaseDate: Date.now(),
+            purchaseOrderNo: '',
+            unitCost: 0.0,
+            totalAmount: 0,
+            dateCreated: Date.now(),
+            dateUpdated: Date.now(),
+            SKU: ''
+          }
         })
         .catch((error) => {
           console.log(error)
@@ -339,9 +469,9 @@ export default {
         ok: 'Yes',
         cancel: 'No'
       }).then(() => {
-        console.log('came here')
         this.$store.dispatch('RawMaterials/deleteRawMaterial', this.selected[0].id)
           .then((data) => {
+            this.selected = []
             this.$q.notify({
               message: `Selected Material has been Deleted!`,
               timeout: 3000,

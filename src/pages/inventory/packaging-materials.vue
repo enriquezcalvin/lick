@@ -243,7 +243,6 @@ export default {
     ]
   }),
   created () {
-    this.$store.dispatch('PackagingMaterials/loadPackagingMaterials')
     // this.$store.dispatch('PackagingMaterials/loadDummy')
   },
   computed: {

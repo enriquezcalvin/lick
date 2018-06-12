@@ -10,3 +10,8 @@ export const deleteRawMaterial = (state, payload) => {
   let index = state.rawMaterials.findIndex((a) => a.id === payload)
   state.rawMaterials.splice(index, 1)
 }
+
+export const editRawMaterial = (state, payload) => {
+  let index = state.rawMaterials.findIndex((a) => a.id === payload.id)
+  state.rawMaterials[index] = payload
+}

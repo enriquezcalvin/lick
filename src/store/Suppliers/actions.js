@@ -13,7 +13,6 @@ export const loadDummy = ({commit}, payload) => {
       ]
     }
   ]
-  console.log(suppliers)
   commit('setSuppliers', suppliers)
 }
 

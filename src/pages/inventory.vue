@@ -19,6 +19,13 @@
 <script>
 import { QTabs, QBtn, QRouteTab } from 'quasar'
 export default {
+  created () {
+    this.$store.dispatch('RawMaterials/loadRawMaterials')
+    this.$store.dispatch('OtherMaterials/loadOtherMaterials')
+    this.$store.dispatch('PackagingMaterials/loadPackagingMaterials')
+    this.$store.dispatch('Suppliers/loadSuppliers')
+    this.$store.dispatch('FinishedGoods/loadFinishedGoods')
+  },
   components: {
     QTabs,
     QRouteTab,
