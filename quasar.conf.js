@@ -5,7 +5,7 @@ module.exports = function (ctx) {
     // app plugins (/src/plugins)
     plugins: [
       'i18n',
-      // 'axios',
+      'axios',
       'firebase',
       'vuelidate'
     ],
@@ -43,7 +43,12 @@ module.exports = function (ctx) {
     devServer: {
       // https: true,
       // port: 8080,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3333'
+        }
+      }
     },
     // framework: 'all' --- includes everything; for dev only!
     framework: {

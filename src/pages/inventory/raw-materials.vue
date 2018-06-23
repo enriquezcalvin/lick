@@ -368,8 +368,6 @@ export default {
         purchaseOrderNo: '',
         unitCost: 0.0,
         totalAmount: 0,
-        dateCreated: Date.now(),
-        dateUpdated: Date.now(),
         SKU: ''
       }
     },
